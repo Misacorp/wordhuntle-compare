@@ -1,19 +1,21 @@
 import React from 'react';
 import styled from 'styled-components';
+import { v4 as uuid } from 'uuid';
 
 const Compare = ({className}) => {
-    const [wordLists, setWordLists] = React.useState([[], []]);
+    const [wordLists, setWordLists] = React.useState([{id: uuid(), words: []}, {id: uuid(), words: []}]);
 
-    const handleWordListChange = index => event => {
+    const handleWordListChange = id => event => {
         const newWordLists = [...wordLists];
-        newWordLists[index] = event.target.value.split('\n').filter((word) => word.length > 0);
+        const target = newWordLists.find((wordList) => wordList.id === id);
+        target.words =  event.target.value.split('\n').filter((word) => word.length > 0);
         setWordLists(newWordLists)
     }
 
     const uniqueWords = React.useMemo(() => {
         const allWords = new Set();
         wordLists.forEach((list) => {
-            list.forEach((word) => {
+            list.words.forEach((word) => {
                 allWords.add(word)
             })
         })
@@ -22,20 +24,29 @@ const Compare = ({className}) => {
     }, [wordLists])
 
     const addWordList = () => {
-        setWordLists([...wordLists, []])
+        setWordLists([...wordLists, {id: uuid(), words: []}])
+    }
+
+    const removeWordList = (id) => () => {
+        const newWordLists = wordLists.filter((wordList) => wordList.id !== id);
+        setWordLists(newWordLists)
     }
 
     return (
         <div className={className}>
             {
-                wordLists.map((wordList, index) => (
-                    <div>
-                        <textarea onChange={handleWordListChange(index)} rows="10" />
+                wordLists.map((wordList) => (
+                    <div key={wordList.id}>
+                        <textarea onChange={handleWordListChange(wordList.id)} rows="10" />
 
-                        <p><b>{wordList.length} words</b></p>
-                        <p>Words missing from this list:</p>
+                        {wordLists.length > 1 && (
+                            <button type="button" onClick={removeWordList(wordList.id)}>Remove this list</button>
+                        )}
+
+                        <p><b>{wordList.words.length} words</b></p>
+                        <p>{uniqueWords.filter((word) => !wordList.words.includes(word)).length} words missing from this list:</p>
                         <pre>
-                            {uniqueWords.filter((word) => !wordList.includes(word)).join('\n')}
+                            {uniqueWords.filter((word) => !wordList.words.includes(word)).join('\n')}
                         </pre>
                     </div>
                 ))
@@ -55,7 +66,7 @@ export default styled(Compare)`
     width: 100%;
   }
   
-  button {
+  & > button {
     padding: 1rem;
   }
 `;
