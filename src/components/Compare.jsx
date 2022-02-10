@@ -21,6 +21,10 @@ const Compare = ({className}) => {
         return Array.from(allWords);
     }, [wordLists])
 
+    const addWordList = () => {
+        setWordLists([...wordLists, []])
+    }
+
     return (
         <div className={className}>
             {
@@ -36,14 +40,22 @@ const Compare = ({className}) => {
                     </div>
                 ))
             }
+
+            <button type="button" onClick={addWordList} >Add another word list</button>
         </div>
     )
 };
 
 export default styled(Compare)`
   display: flex;
+  align-items: flex-start;
   gap: 2rem;
+  
   textarea {
     width: 100%;
+  }
+  
+  button {
+    padding: 1rem;
   }
 `;
